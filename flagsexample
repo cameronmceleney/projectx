@@ -1,0 +1,73 @@
+/* references:	https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html
+ * 				https://www.gnu.org/software/libc/manual/html_node/Using-Getopt.html#Using-Getopt
+ * 				https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
+ * 
+ * 				all were accessed on 15 Jan 19 by Cameron McEleney. Code seen here is an altered version of Ref1.
+ */
+ 
+ 
+//the ctype header encapsulates character features
+ #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main (int argc, char **argv)
+{
+	  //declares all flags and variables required. For demo purposes, these set values are arbitrary
+	  int aflag = 0;
+	  int bflag = 0;
+	  char *cvalue = NULL;
+	  const char* dvalue = "DValue_flag_default";
+	  int index;
+	  int c;
+		
+	  //presents the error count to 0 (meaning it is successful)
+	  opterr = 0;
+
+	  //includes 4 flags abcd: and will read through them until no more flags are detected (-1)
+	  while ((c = getopt (argc, argv, "abcd:")) != -1)
+		switch (c)
+		  {
+		  //if flag a is entered, set flaga value to 1
+		  case 'a':
+			aflag = 1;
+			break;
+		  //if flag b is entered, set flagb value to 5
+		  case 'b':
+			bflag = 5;
+			break;
+		  //if flagc is entered, set flagc value to whatever the input flag value is (but because of the preset it will always be NULL)
+		  case 'c':
+			cvalue = optarg;
+			break;
+		  //if flagd is entered, set flagd value to whatever followed the flag in the command line
+		  case 'd':
+			 if(optarg) dvalue = optarg ;
+			 break;
+		  //this case looks for unknown arguments and flags and outputs a response to the user
+		  case '?':
+			//if the user fails to add an argument following the cflag, this statement will notify the user of this
+			if (optopt == 'c')
+			  fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+			else if (isprint (optopt))
+				//if the user entrs an unknown flag then this statement will notify them of this
+			  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+			else
+				//this final statement is a catch-all statement for any other unknowns and it returns an error
+			  fprintf (stderr,
+					   "Unknown option character `\\x%x'.\n",
+					   optopt);
+			return 1;
+		  //the default cause for the switch statement is to just exit the program to avoid infinite loops
+		  default:
+			abort ();
+		  }
+		//This prints all the values for each flag
+	  printf ("aflag = %d, bflag = %d, cvalue = %s, dvalue = %s\n",
+			  aflag, bflag, cvalue,dvalue);
+
+	  for (index = optind; index < argc; index++)
+		printf ("Non-option argument %s\n", argv[index]);
+	  return 0;
+	}      
